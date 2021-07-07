@@ -21,35 +21,46 @@ backBtn.addEventListener("click", () => {
     document.querySelector(".main__left").style.display = "none";
     document.querySelector(".header__back").style.display = "block";
   });
+
+const user = prompt("Enter your name");
+console.log(user);
+const iniCall = document.querySelector("#iniCall");
+iniCall.addEventListener("click", (e) => {
+  videocallinititate();
+});
+var videostream;
 const peers = {}
-let videostream;
-navigator.mediaDevices.getUserMedia({
-    video:true,
-    audio:true
-}).then(stream => {
-    videostream=stream;
-    addVideoStream(myvideo,stream)
-
-    myPeer.on('call',call => {
-        call.answer(stream)
-        const video=document.createElement('video')
-        call.on('stream',userVideoStream=>{
-            addVideoStream(video,userVideoStream)
-        })
-    })
-    socket.on('user-connected',userId => {
-
-        connecttonewuser(userId,stream)
-    })
-})
-
 socket.on('user-disconnected',userId => {
     if(peers[userId]) peers[userId].close()
 })
 myPeer.on('open',id => {
-    socket.emit('join-room',room_id,id)
+    socket.emit('join-room',room_id,id,user)
 })
-
+myPeer.on('call',call => {
+  console.log("archh")
+})
+function videocallinititate(){
+  navigator.mediaDevices.getUserMedia({
+    video:true,
+    audio:true
+  
+  }).then(stream => {
+    videostream=stream;
+    console.log(videostream, stream)
+    addVideoStream(myvideo,stream)
+    console.log(videostream)
+    socket.emit("onvc")
+    myPeer.on('call',call => {
+      console.log("archh")
+    })
+    socket.on('user-connected',userId => {
+      console.log(
+        "user is connected"
+      )
+      connecttonewuser(userId,stream)
+    })
+  })
+}
 
 function connecttonewuser(userId,stream){
     const call = myPeer.call(userId, stream)
@@ -90,6 +101,8 @@ text.addEventListener("keydown", (e) => {
 const inviteButton = document.querySelector("#inviteButton");
 const muteButton = document.querySelector("#muteButton");
 const stopVideo = document.querySelector("#stopVideo");
+const endCall = document.querySelector("#endCall");
+
 muteButton.addEventListener("click", () => {
   const enabled = videostream.getAudioTracks()[0].enabled;
   if (enabled) {
@@ -127,6 +140,11 @@ inviteButton.addEventListener("click", (e) => {
   );
 });
 
+endCall.addEventListener("click", (e) => {
+  videostream.getVideoTracks()[0].enabled = false;
+  endCall.classList.toggle("background__red");
+})
+
 socket.on("createMessage", (message, userName) => {
   messages.innerHTML =
     messages.innerHTML +
@@ -137,3 +155,25 @@ socket.on("createMessage", (message, userName) => {
         <span>${message}</span>
     </div>`;
 });
+
+socket.on('user-connected',userId => {
+  console.log(
+    "user is connected"
+  )
+  console.log(videostream)
+  connecttonewuser(userId,videostream)
+})
+
+myPeer.on("call", call => {
+  console.log("receviing call")
+  call.answer(videostream)
+        const video = document.createElement('video')
+        call.on('stream',userVideoStream=>{
+            addVideoStream(video,userVideoStream)
+        })
+})
+
+socket.on("createVc", (userId) => {
+  console.log("archii",userId, videostream)
+  connecttonewuser(userId,videostream)
+})
