@@ -17,7 +17,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 8vh;
+  height: 6vh;
   position: relative;
   width: 100%;
   background-color: var(--main-darklg);
@@ -29,12 +29,12 @@
 
 .main {
   overflow: hidden;
-  height: 92vh;
+  height: 94vh;
   display: flex;
 }
 
 .main__left {
-  flex: 0.7;
+  flex: 1.0;
   display: flex;
   flex-direction: column;
 }
@@ -60,17 +60,18 @@ video {
 }
 
 .options {
-  padding: 1rem;
+  padding: 0.9rem;
   display: flex;
   background-color: var(--main-darklg);
+  justify-content: center;
 }
 
 .options__left {
-  display: flex;
+  display: none;
 }
 
 .options__right {
-  margin-left: auto;
+  display: flex;
 }
 
 .options__button {
@@ -78,11 +79,37 @@ video {
   justify-content: center;
   align-items: center;
   background-color: var(--primary-color);
-  height: 50px;
+  height: 45px;
   border-radius: 5px;
   color: var(--main-light);
   font-size: 1.2rem;
   width: 50px;
+  margin: 0 0.5rem;
+}
+
+.receivecall__button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: green;
+  height: 45px;
+  border-radius: 5px;
+  color: var(--main-light);
+  font-size: 1.2rem;
+  width: 50px;
+  margin: 0 0.5rem;
+}
+
+.endcall__button {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  background-color: #f6484a;
+  height: 45px;
+  border-radius: 5px;
+  color: var(--main-light);
+  font-size: 1.2rem;
+  width: 60px;
   margin: 0 0.5rem;
 }
 
@@ -91,9 +118,9 @@ video {
 }
 
 .main__right {
-  display: flex;
+  display: none;
   flex-direction: column;
-  flex: 0.3;
+  flex: 3.6; 
   background-color: #242f41;
 }
 

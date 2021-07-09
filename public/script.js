@@ -1,6 +1,6 @@
 const socket = io('/')
 const videoGrid = document.getElementById('video-grid');
-const showChat = document.querySelector("#showChat");
+const chat = document.querySelector("#chat");
 const backBtn = document.querySelector(".header__back");
 const myvideo = document.createElement('video')
 myvideo.muted = true
@@ -15,7 +15,7 @@ backBtn.addEventListener("click", () => {
     document.querySelector(".header__back").style.display = "none";
   });
   
-  showChat.addEventListener("click", () => {
+  chat.addEventListener("click", () => {
     document.querySelector(".main__right").style.display = "flex";
     document.querySelector(".main__right").style.flex = "1";
     document.querySelector(".main__left").style.display = "none";
@@ -23,42 +23,42 @@ backBtn.addEventListener("click", () => {
   });
 
 const user = prompt("Enter your name");
-console.log(user);
+//console.log(user);
 const iniCall = document.querySelector("#iniCall");
 iniCall.addEventListener("click", (e) => {
   videocallinititate();
 });
 var videostream;
 const peers = {}
-socket.on('user-disconnected',userId => {
-    if(peers[userId]) peers[userId].close()
-})
 myPeer.on('open',id => {
     socket.emit('join-room',room_id,id,user)
 })
-myPeer.on('call',call => {
-  console.log("archh")
-})
+
 function videocallinititate(){
+  document.querySelector("#video-grid").style.display = "flex";
+  document.querySelector(".receivecall__button").style.display = "none";
+  document.querySelector(".endcall__button").style.display = "flex";
+  document.querySelector(".options__left").style.display = "flex";
+  document.querySelector(".main__left").style.flex = "2.8";
+  document.querySelector(".main__right").style.flex = "1.2";
   navigator.mediaDevices.getUserMedia({
     video:true,
     audio:true
   
   }).then(stream => {
+    //adds the video of the person who initiates the call
     videostream=stream;
-    console.log(videostream, stream)
     addVideoStream(myvideo,stream)
-    console.log(videostream)
+    //connects the user to the wholeroom
     socket.emit("onvc")
-    myPeer.on('call',call => {
-      console.log("archh")
-    })
-    socket.on('user-connected',userId => {
-      console.log(
-        "user is connected"
-      )
-      connecttonewuser(userId,stream)
-    })
+    // myPeer.on('call',call => {
+    //   console.log("archh")
+    // })
+    // socket.on('user-connected',userId => {
+    //   console.log("user is connected")
+    //   connecttonewuser(userId,stream)
+    // })
+   // connecttonewuser(userId,stream)
   })
 }
 
@@ -78,6 +78,7 @@ function addVideoStream(video,stream){
     video.addEventListener('loadedmetadata',() => {
         video.play()
     })
+    console.log(video)
     videoGrid.append(video)
 }
 let text = document.querySelector("#chat_message");
@@ -135,14 +136,20 @@ stopVideo.addEventListener("click", () => {
 
 inviteButton.addEventListener("click", (e) => {
   prompt(
-    "Copy this link and send it to people you want to meet with",
+    "Copy this link and send it to people you want to mseet with",
     window.location.href
   );
 });
-
+socket.on('user-disconnected',userId => {
+  if(peers[userId]) peers[userId].close()
+})
 endCall.addEventListener("click", (e) => {
-  videostream.getVideoTracks()[0].enabled = false;
-  endCall.classList.toggle("background__red");
+  document.querySelector(".receivecall__button").style.display = "flex";
+  document.querySelector(".endcall__button").style.display = "none";
+  document.querySelector(".options__left").style.display = "none";
+  socket.emit("callend")
+  document.querySelector("#video-grid").style.display = "none";
+  myvideo.remove()
 })
 
 socket.on("createMessage", (message, userName) => {
@@ -160,12 +167,13 @@ socket.on('user-connected',userId => {
   console.log(
     "user is connected"
   )
-  console.log(videostream)
-  connecttonewuser(userId,videostream)
+  //console.log(videostream)
+  //connecttonewuser(userId,videostream)
 })
 
 myPeer.on("call", call => {
-  console.log("receviing call")
+  console.log("receiving call")
+  // Answer the call, providing our mediaStream
   call.answer(videostream)
         const video = document.createElement('video')
         call.on('stream',userVideoStream=>{
@@ -174,6 +182,5 @@ myPeer.on("call", call => {
 })
 
 socket.on("createVc", (userId) => {
-  console.log("archii",userId, videostream)
   connecttonewuser(userId,videostream)
 })

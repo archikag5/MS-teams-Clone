@@ -32,10 +32,9 @@ io.on('connection',socket => {
             io.to(roomId).emit("createMessage", message, userName);
           });
           socket.on("onvc",()=> {
-            //  console.log("vs")
               io.to(roomId).emit("createVc", userId)
           })
-        socket.on('disconnect',() => {
+        socket.on('callend',() => {
             socket.to(roomId).emit('user-disconnected',userId)
         })
     })
