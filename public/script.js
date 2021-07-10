@@ -103,6 +103,8 @@ const inviteButton = document.querySelector("#inviteButton");
 const muteButton = document.querySelector("#muteButton");
 const stopVideo = document.querySelector("#stopVideo");
 const endCall = document.querySelector("#endCall");
+const screenShare = document.querySelector("#screenshare");
+const record = document.querySelector("#record");
 
 muteButton.addEventListener("click", () => {
   const enabled = videostream.getAudioTracks()[0].enabled;
@@ -117,6 +119,12 @@ muteButton.addEventListener("click", () => {
     muteButton.classList.toggle("background__red");
     muteButton.innerHTML = html;
   }
+});
+screenShare.addEventListener("click", () => {
+  
+});
+record.addEventListener("click", () => {
+  
 });
 
 stopVideo.addEventListener("click", () => {
