@@ -3,6 +3,9 @@ const videoGrid = document.getElementById('video-grid');
 const chat = document.querySelector("#chat");
 const backBtn = document.querySelector(".header__back");
 const myvideo = document.createElement('video')
+var streams=[]
+var disusers=[]
+var myUserId=""
 myvideo.muted = true
 const myPeer = new Peer(undefined,{
     host:'/',
@@ -23,12 +26,12 @@ backBtn.addEventListener("click", () => {
   });
 
 const user = prompt("Enter your name");
-//console.log(user);
 const iniCall = document.querySelector("#iniCall");
 iniCall.addEventListener("click", (e) => {
   videocallinititate();
 });
 var videostream;
+var screenSharestream;
 const peers = {}
 myPeer.on('open',id => {
     socket.emit('join-room',room_id,id,user)
@@ -48,23 +51,17 @@ function videocallinititate(){
   }).then(stream => {
     //adds the video of the person who initiates the call
     videostream=stream;
+    console.log(videostream)
     addVideoStream(myvideo,stream)
     //connects the user to the wholeroom
     socket.emit("onvc")
-    // myPeer.on('call',call => {
-    //   console.log("archh")
-    // })
-    // socket.on('user-connected',userId => {
-    //   console.log("user is connected")
-    //   connecttonewuser(userId,stream)
-    // })
-   // connecttonewuser(userId,stream)
   })
 }
 
 function connecttonewuser(userId,stream){
     const call = myPeer.call(userId, stream)
     const video = document.createElement('video')
+    //connects user1 with user2
     call.on('stream',userVideoStream => {
         addVideoStream(video,userVideoStream)
     })
@@ -74,11 +71,13 @@ function connecttonewuser(userId,stream){
     peers[userId] = call
 }
 function addVideoStream(video,stream){
+  if(streams.includes(stream.id))
+  return;
+  streams.push(stream.id)
     video.srcObject = stream
     video.addEventListener('loadedmetadata',() => {
         video.play()
     })
-    console.log(video)
     videoGrid.append(video)
 }
 let text = document.querySelector("#chat_message");
@@ -103,7 +102,7 @@ const inviteButton = document.querySelector("#inviteButton");
 const muteButton = document.querySelector("#muteButton");
 const stopVideo = document.querySelector("#stopVideo");
 const endCall = document.querySelector("#endCall");
-const screenShare = document.querySelector("#screenshare");
+// const screenShare = document.querySelector("#screenshare");
 const record = document.querySelector("#record");
 
 muteButton.addEventListener("click", () => {
@@ -120,12 +119,26 @@ muteButton.addEventListener("click", () => {
     muteButton.innerHTML = html;
   }
 });
-screenShare.addEventListener("click", () => {
-  
-});
-record.addEventListener("click", () => {
-  
-});
+// const screen = document.getElementById('screen-container');
+// function screenSharing(){
+//   navigator.mediaDevices.getDisplayMedia({
+//     video: {
+//       cursor: 'always'
+//     },
+//     audio: {
+//       echoCancellation: true,
+//       noiseSuppression: true
+//     }
+//   }).then(stream => {
+//     screenSharestream = stream
+//     screen.srcObject = screenSharestream
+//     addVideoStream(screensharevideo,stream)
+//      myPeer.call(userId, screenSharestream);
+//   })
+// }
+// screenShare.addEventListener("click", () => {
+//   screenSharing();
+// });
 
 stopVideo.addEventListener("click", () => {
   const enabled = videostream.getVideoTracks()[0].enabled;
@@ -149,15 +162,17 @@ inviteButton.addEventListener("click", (e) => {
   );
 });
 socket.on('user-disconnected',userId => {
+  console.log("disconnected")
   if(peers[userId]) peers[userId].close()
 })
 endCall.addEventListener("click", (e) => {
   document.querySelector(".receivecall__button").style.display = "flex";
   document.querySelector(".endcall__button").style.display = "none";
   document.querySelector(".options__left").style.display = "none";
-  socket.emit("callend")
+  videostream.getTracks().forEach(track => track.stop());
   document.querySelector("#video-grid").style.display = "none";
   myvideo.remove()
+  socket.emit("callend")
 })
 
 socket.on("createMessage", (message, userName) => {
@@ -172,11 +187,10 @@ socket.on("createMessage", (message, userName) => {
 });
 
 socket.on('user-connected',userId => {
+  myUserId = userId;
   console.log(
     "user is connected"
   )
-  //console.log(videostream)
-  //connecttonewuser(userId,videostream)
 })
 
 myPeer.on("call", call => {
@@ -184,11 +198,13 @@ myPeer.on("call", call => {
   // Answer the call, providing our mediaStream
   call.answer(videostream)
         const video = document.createElement('video')
+        //connects user2 with user1
         call.on('stream',userVideoStream=>{
             addVideoStream(video,userVideoStream)
         })
 })
-
 socket.on("createVc", (userId) => {
   connecttonewuser(userId,videostream)
 })
+
+//user1 user2

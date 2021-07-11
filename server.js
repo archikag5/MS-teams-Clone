@@ -35,7 +35,7 @@ io.on('connection',socket => {
               io.to(roomId).emit("createVc", userId)
           })
         socket.on('callend',() => {
-            socket.to(roomId).emit('user-disconnected',userId)
+            io.to(roomId).emit('user-disconnected',userId)
         })
     })
 })
