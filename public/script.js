@@ -9,13 +9,20 @@ const myvideo = document.createElement('video')
 // screen share video
 const screenvideo = document.createElement('video')
 //Ids of different video streams
+
 var streams = []
 var userss = []
+var videostream;
+var screenSharestream;
+const peers = {}
+
 myvideo.muted = true
+
 const myPeer = new Peer(undefined,{
     host:'/',
     port:'3001'
 })
+
 backBtn.addEventListener("click", () => {
     document.querySelector(".main__left").style.display = "flex";
     document.querySelector(".main__left").style.flex = "1";
@@ -31,38 +38,36 @@ chat.addEventListener("click", () => {
 });
 
 const user = prompt("Enter your name");
+
 const iniCall = document.querySelector("#iniCall");
 iniCall.addEventListener("click", (e) => {
-  videocallinititate();
+    videocallinititate();
 });
-var videostream;
-var screenSharestream;
-const peers = {}
+
 myPeer.on('open',id => {
     socket.emit('join-room',room_id,id,user)
 })
 
 function videocallinititate(){
-  document.querySelector("#video-grid").style.display = "flex";
-  document.querySelector(".receivecall__button").style.display = "none";
-  document.querySelector(".endcall__button").style.display = "flex";
-  document.querySelector(".options__left").style.display = "flex";
-  document.querySelector(".main__left").style.flex = "2.8";
-  document.querySelector(".main__right").style.flex = "1.2";
-  navigator.mediaDevices.getUserMedia({
+    document.querySelector("#video-grid").style.display = "flex";
+    document.querySelector(".receivecall__button").style.display = "none";
+    document.querySelector(".endcall__button").style.display = "flex";
+    document.querySelector(".options__left").style.display = "flex";
+    document.querySelector(".main__left").style.flex = "2.8";
+    document.querySelector(".main__right").style.flex = "1.2";
+    navigator.mediaDevices.getUserMedia({
     video:true,
     audio:true
-  
   }).then(stream => {
     //adds the video of the person who initiates the call
     videostream=stream;
-    console.log(videostream)
     addVideoStream(myvideo,stream)
     //connects the user to the wholeroom
     socket.emit("onvc")
   })
 }
 
+//connects to new user
 function connecttonewuser(userId,stream){
     const call = myPeer.call(userId, stream)
     const video = document.createElement('video')
@@ -78,18 +83,25 @@ function connecttonewuser(userId,stream){
     return
     userss.push(userId)
 }
+
+//Adds Video Stream
 function addVideoStream(video,stream){
-  if(streams.includes(stream.id))
-  return;
-  streams.push(stream.id)
+    if(streams.includes(stream.id))
+    return;
+    streams.push(stream.id)
+
     video.srcObject = stream
     video.addEventListener('loadedmetadata',() => {
         video.play()
     })
     videoGrid.append(video)
 }
+
+//adds text message 
 let text = document.querySelector("#chat_message");
+//emits the message to the whole room
 let send = document.getElementById("send");
+//adds the message
 let messages = document.querySelector(".messages");
 
 send.addEventListener("click", (e) => {
@@ -106,12 +118,16 @@ text.addEventListener("keydown", (e) => {
   }
 });
 
+//shows room link to invite friends
 const inviteButton = document.querySelector("#inviteButton");
+//enable and disable audio
 const muteButton = document.querySelector("#muteButton");
+//enable and disable video
 const stopVideo = document.querySelector("#stopVideo");
+//ends the call
 const endCall = document.querySelector("#endCall");
+//screen share to the whole room
 const screenShare = document.querySelector("#screenshare");
-const record = document.querySelector("#record");
 
 muteButton.addEventListener("click", () => {
   const enabled = videostream.getAudioTracks()[0].enabled;
@@ -158,10 +174,10 @@ function screenSharing(){
       screenShare.classList.toggle("background__red");
       screenShare.innerHTML = html;
       screenSharestream = undefined;
-
   }
   
 }
+
 screenShare.addEventListener("click", () => {
   screenSharing();
 });
@@ -187,10 +203,12 @@ inviteButton.addEventListener("click", (e) => {
     window.location.href
   );
 });
+
 socket.on('user-disconnected',userId => {
   console.log("disconnected")
   if(peers[userId]) peers[userId].close()
 })
+
 endCall.addEventListener("click", (e) => {
   document.querySelector(".receivecall__button").style.display = "flex";
   document.querySelector(".endcall__button").style.display = "none";
@@ -214,9 +232,7 @@ socket.on("createMessage", (message, userName) => {
 
 socket.on('user-connected',userId => {
   myUserId = userId;
-  console.log(
-    "user is connected"
-  )
+  console.log( "user is connected")
 })
 
 myPeer.on("call", call => {
@@ -233,9 +249,11 @@ myPeer.on("call", call => {
     console.log("closed")
   })
 })
+
 socket.on("createVc", (userId) => {
   connecttonewuser(userId,videostream)
 })
+
 socket.on("ss", (userId) => {
   connecttonewuser(userId,screenSharestream)
 })
