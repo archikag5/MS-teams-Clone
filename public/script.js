@@ -1,11 +1,16 @@
 const socket = io('/')
 const videoGrid = document.getElementById('video-grid');
+// shows chat when clicked
 const chat = document.querySelector("#chat");
+// takes back to the main page
 const backBtn = document.querySelector(".header__back");
+// user video initialization
 const myvideo = document.createElement('video')
-var streams=[]
-var disusers=[]
-var myUserId=""
+// screen share video
+const screenvideo = document.createElement('video')
+//Ids of different video streams
+var streams = []
+var userss = []
 myvideo.muted = true
 const myPeer = new Peer(undefined,{
     host:'/',
@@ -18,12 +23,12 @@ backBtn.addEventListener("click", () => {
     document.querySelector(".header__back").style.display = "none";
   });
   
-  chat.addEventListener("click", () => {
+chat.addEventListener("click", () => {
     document.querySelector(".main__right").style.display = "flex";
     document.querySelector(".main__right").style.flex = "1";
     document.querySelector(".main__left").style.display = "none";
     document.querySelector(".header__back").style.display = "block";
-  });
+});
 
 const user = prompt("Enter your name");
 const iniCall = document.querySelector("#iniCall");
@@ -69,6 +74,9 @@ function connecttonewuser(userId,stream){
         video.remove()
     })
     peers[userId] = call
+    if(userss.includes(userId))
+    return
+    userss.push(userId)
 }
 function addVideoStream(video,stream){
   if(streams.includes(stream.id))
@@ -102,7 +110,7 @@ const inviteButton = document.querySelector("#inviteButton");
 const muteButton = document.querySelector("#muteButton");
 const stopVideo = document.querySelector("#stopVideo");
 const endCall = document.querySelector("#endCall");
-// const screenShare = document.querySelector("#screenshare");
+const screenShare = document.querySelector("#screenshare");
 const record = document.querySelector("#record");
 
 muteButton.addEventListener("click", () => {
@@ -119,26 +127,44 @@ muteButton.addEventListener("click", () => {
     muteButton.innerHTML = html;
   }
 });
-// const screen = document.getElementById('screen-container');
-// function screenSharing(){
-//   navigator.mediaDevices.getDisplayMedia({
-//     video: {
-//       cursor: 'always'
-//     },
-//     audio: {
-//       echoCancellation: true,
-//       noiseSuppression: true
-//     }
-//   }).then(stream => {
-//     screenSharestream = stream
-//     screen.srcObject = screenSharestream
-//     addVideoStream(screensharevideo,stream)
-//      myPeer.call(userId, screenSharestream);
-//   })
-// }
-// screenShare.addEventListener("click", () => {
-//   screenSharing();
-// });
+
+function screenSharing(){
+  if(screenSharestream == null){
+    navigator.mediaDevices.getDisplayMedia({
+      video: {
+        cursor: 'always'
+      },
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true
+      }
+    }).then(stream => {
+      screenSharestream = stream
+
+      addVideoStream(screenvideo,stream)
+      userss.forEach(users => {
+        console.log("ss")
+        myPeer.call(users, stream, {
+          metadata: { "type": "screenShare" }
+      });
+      });
+    })
+  }
+  else
+  {
+      screenSharestream.getVideoTracks[0].enabled = false;
+      screenvideo.setAttribute("style", "display:none");
+      html = `<i class="fa fa-desktop"></i>`;
+      screenShare.classList.toggle("background__red");
+      screenShare.innerHTML = html;
+      screenSharestream = undefined;
+
+  }
+  
+}
+screenShare.addEventListener("click", () => {
+  screenSharing();
+});
 
 stopVideo.addEventListener("click", () => {
   const enabled = videostream.getVideoTracks()[0].enabled;
@@ -171,7 +197,7 @@ endCall.addEventListener("click", (e) => {
   document.querySelector(".options__left").style.display = "none";
   videostream.getTracks().forEach(track => track.stop());
   document.querySelector("#video-grid").style.display = "none";
-  myvideo.remove()
+  videostream =  undefined;
   socket.emit("callend")
 })
 
@@ -202,9 +228,16 @@ myPeer.on("call", call => {
         call.on('stream',userVideoStream=>{
             addVideoStream(video,userVideoStream)
         })
+  call.on("close",() => {
+    video.remove();
+    console.log("closed")
+  })
 })
 socket.on("createVc", (userId) => {
   connecttonewuser(userId,videostream)
+})
+socket.on("ss", (userId) => {
+  connecttonewuser(userId,screenSharestream)
 })
 
 //user1 user2

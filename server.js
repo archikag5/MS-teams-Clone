@@ -34,6 +34,9 @@ io.on('connection',socket => {
           socket.on("onvc",()=> {
               io.to(roomId).emit("createVc", userId)
           })
+          socket.on("sharingscreen",()=> {
+            io.to(roomId).emit("ss", userId)
+        })
         socket.on('callend',() => {
             io.to(roomId).emit('user-disconnected',userId)
         })
