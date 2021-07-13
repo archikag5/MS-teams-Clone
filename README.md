@@ -3,8 +3,11 @@ I have deployed the app on heroku but i think it's not connected to the server t
 But it's running perfectly on local host and think there's some problem with deployment, I tried on both azure and heroku.
 
 how to run on local system:-
+
 On terminal
+
 ->nodemon server.js
+
 ->peerjs --port 3001
 
 
@@ -12,8 +15,11 @@ Video calling app - iConnect
 
 TECHNOLOGIES USED:-
 -> framework - nodejs
+
 -> frontend - HTML, CSS and embedded javascript
+
 -> database - firebase
+
 -> Methodology - Agile using trello  
 
 CURRENT FEATURES
