@@ -1,4 +1,8 @@
 # MS-teams-Clone
+how to run on local system:-
+On terminal
+->nodemon server.js
+->peerjs --port 3001
 Video calling app - iConnect
 
 TECHNOLOGIES USED:-
