@@ -1,4 +1,7 @@
 # MS-teams-Clone
+I have deployed the app on heroku but i think it's not connected to the server that's why most of it isn't working, it's not able to connect even 2 people, only the UI is visible.
+But it's running perfectly on local host and think there's some problem with deployment, I tried on both azzure and heroku.
+
 how to run on local system:-
 On terminal
 ->nodemon server.js
